@@ -167,6 +167,33 @@ class Fintopio:
         else:
             return None
         
+    def start_sapce_tapper(self, token: str):
+        url = 'https://fintopio-tg.fintopio.com/api/hold/space-tappers/game-settings'
+        self.headers.update({
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        })
+
+        response = self.session.get(url, headers=self.headers)
+        if response.status_code in [200, 201]:
+            return response.json()
+        else:
+            return None
+        
+    def claim_space_tapper(self, token: str, score: int):
+        url = 'https://fintopio-tg.fintopio.com/api/hold/space-tappers/add-new-result'
+        data = json.dumps({'score':score})
+        self.headers.update({
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        })
+
+        response = self.session.post(url, headers=self.headers, data=data)
+        if response.status_code in [200, 201]:
+            return response.json()
+        else:
+            return None
+        
     def tasks(self, token: str):
         url = 'https://fintopio-tg.fintopio.com/api/hold/tasks'
         self.headers.update({
@@ -211,6 +238,14 @@ class Fintopio:
         account = self.load_data(query)
 
         token = self.auth_telegram(query)
+        if not token:
+            self.log(
+                f"{Fore.MAGENTA+Style.BRIGHT}[ Account{Style.RESET_ALL}"
+                f"{Fore.WHITE+Style.BRIGHT} {account} {Style.RESET_ALL}"
+                f"{Fore.RED+Style.BRIGHT}Query Isn't Valid{Style.RESET_ALL}"
+                f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+            )
+            return
 
         if token:
             user = self.user(token)
@@ -359,9 +394,38 @@ class Fintopio:
                         f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
                         f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                     )
+                time.sleep(1)
+
+                space_tapper = self.start_sapce_tapper(token)
+                if space_tapper:
+                    score = space_tapper['maxScore'] * space_tapper['rate']
+
+                    claim = self.claim_space_tapper(token, score)
+                    if claim:
+                        self.log(
+                            f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
+                            f"{Fore.GREEN+Style.BRIGHT} Is Finished {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
+                            f"{Fore.WHITE+Style.BRIGHT} {score} {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                        )
+                    else:
+                        self.log(
+                            f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
+                            f"{Fore.RED+Style.BRIGHT} Isn't Finished {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                        )
+                else:
+                    self.log(
+                        f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
+                        f"{Fore.RED+Style.BRIGHT} Isn't Started {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                    )
+                time.sleep(1)
 
                 tasks = self.tasks(token)
                 if tasks:
+                    completed = False
                     for task in tasks:
                         task_id = task['id']
                         slug = task['slug']
@@ -419,6 +483,15 @@ class Fintopio:
                                     f"{Fore.RED+Style.BRIGHT}Isn't Claimed{Style.RESET_ALL}"
                                     f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
                                 )
+                        else:
+                            completed = True
+
+                    if completed:
+                        self.log(
+                            f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
+                            f"{Fore.GREEN+Style.BRIGHT} Is Completed {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                        )
                 else:
                     self.log(
                         f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
@@ -428,7 +501,7 @@ class Fintopio:
             else:
                 self.log(
                     f"{Fore.MAGENTA+Style.BRIGHT}[ Account{Style.RESET_ALL}"
-                    f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
+                    f"{Fore.RED+Style.BRIGHT} Data Is None {Style.RESET_ALL}"
                     f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                 )
 
@@ -445,13 +518,14 @@ class Fintopio:
                     f"{Fore.GREEN + Style.BRIGHT}Account's Total: {Style.RESET_ALL}"
                     f"{Fore.WHITE + Style.BRIGHT}{len(queries)}{Style.RESET_ALL}"
                 )
-                self.log(f"{Fore.CYAN + Style.BRIGHT}-----------------------------------------------------------------------{Style.RESET_ALL}")
+                self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
 
                 for query in queries:
                     query = query.strip()
                     if query:
                         self.process_query(query)
-                        self.log(f"{Fore.CYAN + Style.BRIGHT}-----------------------------------------------------------------------{Style.RESET_ALL}")
+                        self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
+                        time.sleep(3)
 
                 seconds = 1800
                 while seconds > 0:
