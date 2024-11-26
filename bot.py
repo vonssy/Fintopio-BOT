@@ -233,7 +233,18 @@ class Fintopio:
         else:
             return None
         
-    def process_query(self, query: str):
+    def question(self):
+        while True:
+            play_game = input("Auto Play Space Tapper Game? [y/n] -> ").strip().lower()
+            if play_game in ["y", "n"]:
+                play_game = play_game == "y"
+                break
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}Invalid Input.{Fore.WHITE+Style.BRIGHT} Choose 'y' to play or 'n' to skip.{Style.RESET_ALL}")
+      
+        return play_game
+        
+    def process_query(self, query: str, play_game: bool):
 
         account = self.load_data(query)
 
@@ -396,29 +407,36 @@ class Fintopio:
                     )
                 time.sleep(1)
 
-                space_tapper = self.start_sapce_tapper(token)
-                if space_tapper:
-                    score = space_tapper['maxScore'] * space_tapper['rate']
+                if play_game:
+                    space_tapper = self.start_sapce_tapper(token)
+                    if space_tapper:
+                        score = space_tapper['maxScore'] * space_tapper['rate']
 
-                    claim = self.claim_space_tapper(token, score)
-                    if claim:
-                        self.log(
-                            f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
-                            f"{Fore.GREEN+Style.BRIGHT} Is Finished {Style.RESET_ALL}"
-                            f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
-                            f"{Fore.WHITE+Style.BRIGHT} {score} {Style.RESET_ALL}"
-                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
-                        )
+                        claim = self.claim_space_tapper(token, score)
+                        if claim:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT} Is Finished {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
+                                f"{Fore.WHITE+Style.BRIGHT} {score} {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
+                        else:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
+                                f"{Fore.RED+Style.BRIGHT} Isn't Finished {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
                     else:
                         self.log(
                             f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
-                            f"{Fore.RED+Style.BRIGHT} Isn't Finished {Style.RESET_ALL}"
+                            f"{Fore.RED+Style.BRIGHT} Isn't Started {Style.RESET_ALL}"
                             f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                         )
                 else:
                     self.log(
                         f"{Fore.MAGENTA+Style.BRIGHT}[ Space Tapper{Style.RESET_ALL}"
-                        f"{Fore.RED+Style.BRIGHT} Isn't Started {Style.RESET_ALL}"
+                        f"{Fore.YELLOW+Style.BRIGHT} Is Skipped {Style.RESET_ALL}"
                         f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                     )
                 time.sleep(1)
@@ -511,6 +529,8 @@ class Fintopio:
             with open('query.txt', 'r') as file:
                 queries = [line.strip() for line in file if line.strip()]
 
+            play_game = self.question()
+
             while True:
                 self.clear_terminal()
                 self.welcome()
@@ -523,7 +543,7 @@ class Fintopio:
                 for query in queries:
                     query = query.strip()
                     if query:
-                        self.process_query(query)
+                        self.process_query(query, play_game)
                         self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
                         time.sleep(3)
 
