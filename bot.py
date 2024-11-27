@@ -253,11 +253,11 @@ class Fintopio:
                         print(f"{Fore.RED+Style.BRIGHT}Low Point must be greater than 0.{Style.RESET_ALL}")
                         continue
 
-                    max_point = int(input("Set Max Point [ex: 30000]? -> "))
+                    max_point = int(input("Set Max Point [ex: 3000]? -> "))
                     if max_point < low_point:
                         print(f"{Fore.RED+Style.BRIGHT}Max Point must be greater than Low Point.{Style.RESET_ALL}")
-                    elif max_point > 30000:
-                        print(f"{Fore.RED+Style.BRIGHT}Max Point must be less than or equal to 30000.{Style.RESET_ALL}")
+                    elif max_point > 3000:
+                        print(f"{Fore.RED+Style.BRIGHT}Max Point must be less than or equal to 3000.{Style.RESET_ALL}")
                     else:
                         break
                 except ValueError:
@@ -429,7 +429,7 @@ class Fintopio:
                 time.sleep(1)
 
                 if play_game:
-                    score = random.randint(low_point, max_point)
+                    score = random.randint(low_point, max_point) * 10
                     space_tapper = self.start_sapce_tapper(token)
                     if space_tapper:
                         claim = self.claim_space_tapper(token, score)
