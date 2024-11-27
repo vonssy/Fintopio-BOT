@@ -7,8 +7,9 @@ Register Here : [Fintopio](https://t.me/fintopio/wallet?startapp=reflink-reflink
 
   - Auto Get Account Information
   - Auto Claim Daily Login
-  - Auto Start and Claim Farming
   - Auto Destroyed Asteroid
+  - Auto Start and Claim Farming
+  - Auto Play Diamond Breath Game
   - Auto Play Space Tapper Game [y/n]
   - Auto Complete Task
   - Multi Account
