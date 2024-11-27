@@ -275,9 +275,9 @@ class Fintopio:
         if play_game:
             while True:
                 try:
-                    low_point = int(input("Set Low Point [ex: 1]? -> "))
-                    if low_point <= 0:
-                        print(f"{Fore.RED+Style.BRIGHT}Low Point must be greater than 0.{Style.RESET_ALL}")
+                    low_point = int(input("Set Low Point [ex: 1-3000]? -> "))
+                    if low_point <= 0 or low_point > 3000:
+                        print(f"{Fore.RED+Style.BRIGHT}Low Point must be greater than 0 and less than or equal to 3000.{Style.RESET_ALL}")
                         continue
 
                     max_point = int(input("Set Max Point [ex: 3000]? -> "))
