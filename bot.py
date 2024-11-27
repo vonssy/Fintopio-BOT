@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import random
 import urllib.parse
 from colorama import *
 from datetime import datetime, timezone
@@ -241,10 +242,30 @@ class Fintopio:
                 break
             else:
                 print(f"{Fore.RED+Style.BRIGHT}Invalid Input.{Fore.WHITE+Style.BRIGHT} Choose 'y' to play or 'n' to skip.{Style.RESET_ALL}")
-      
-        return play_game
+
+        low_point = 0
+        max_point = 0
+        if play_game:
+            while True:
+                try:
+                    low_point = int(input("Set Low Point [ex: 1]? -> "))
+                    if low_point <= 0:
+                        print(f"{Fore.RED+Style.BRIGHT}Low Point must be greater than 0.{Style.RESET_ALL}")
+                        continue
+
+                    max_point = int(input("Set Max Point [ex: 30000]? -> "))
+                    if max_point < low_point:
+                        print(f"{Fore.RED+Style.BRIGHT}Max Point must be greater than Low Point.{Style.RESET_ALL}")
+                    elif max_point > 30000:
+                        print(f"{Fore.RED+Style.BRIGHT}Max Point must be less than or equal to 30000.{Style.RESET_ALL}")
+                    else:
+                        break
+                except ValueError:
+                    print(f"{Fore.RED+Style.BRIGHT}Invalid input. Enter a number.{Style.RESET_ALL}")
         
-    def process_query(self, query: str, play_game: bool):
+        return play_game, low_point, max_point
+        
+    def process_query(self, query: str, play_game: bool, low_point: int, max_point: int):
 
         account = self.load_data(query)
 
@@ -408,10 +429,9 @@ class Fintopio:
                 time.sleep(1)
 
                 if play_game:
+                    score = random.randint(low_point, max_point)
                     space_tapper = self.start_sapce_tapper(token)
                     if space_tapper:
-                        score = space_tapper['maxScore'] * space_tapper['rate']
-
                         claim = self.claim_space_tapper(token, score)
                         if claim:
                             self.log(
@@ -529,7 +549,7 @@ class Fintopio:
             with open('query.txt', 'r') as file:
                 queries = [line.strip() for line in file if line.strip()]
 
-            play_game = self.question()
+            play_game, low_point, max_point = self.question()
 
             while True:
                 self.clear_terminal()
@@ -543,7 +563,7 @@ class Fintopio:
                 for query in queries:
                     query = query.strip()
                     if query:
-                        self.process_query(query, play_game)
+                        self.process_query(query, play_game, low_point, max_point)
                         self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
                         time.sleep(3)
 
