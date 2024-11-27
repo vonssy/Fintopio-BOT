@@ -4,7 +4,7 @@ import os
 import random
 import urllib.parse
 from colorama import *
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import time
 import pytz
 
@@ -163,6 +163,33 @@ class Fintopio:
         })
 
         response = self.session.post(url, headers=self.headers)
+        if response.status_code in [200, 201]:
+            return response.json()
+        else:
+            return None
+        
+    def start_diamond_breath(self, token: str):
+        url = 'https://fintopio-tg.fintopio.com/api/games/diamond-breath'
+        self.headers.update({
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        })
+
+        response = self.session.get(url, headers=self.headers)
+        if response.status_code in [200, 201]:
+            return response.json()
+        else:
+            return None
+        
+    def finish_diamond_breath(self, token: str, seconds: int):
+        url = 'https://fintopio-tg.fintopio.com/api/games/diamond-breath'
+        data = json.dumps({'seconds':seconds})
+        self.headers.update({
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        })
+
+        response = self.session.post(url, headers=self.headers, data=data)
         if response.status_code in [200, 201]:
             return response.json()
         else:
@@ -424,6 +451,46 @@ class Fintopio:
                     self.log(
                         f"{Fore.MAGENTA+Style.BRIGHT}[ Farming{Style.RESET_ALL}"
                         f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                    )
+                time.sleep(1)
+
+                diamond_breath = self.start_diamond_breath(token)
+                if diamond_breath:
+                    reward = 3200
+                    score = diamond_breath['rewardPerSecond']
+                    is_available = diamond_breath['isAvailableGame']
+                    if is_available:
+                        seconds = reward / score
+                        finish = self.finish_diamond_breath(token, seconds)
+                        if finish:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Diamond Breath{Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT} Is Success {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
+                                f"{Fore.WHITE+Style.BRIGHT} {reward} {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
+                        else:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Diamond Breath{Style.RESET_ALL}"
+                                f"{Fore.RED+Style.BRIGHT} Isn't Success {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
+                    else:
+                        last_play = datetime.strptime(diamond_breath['lastPlayDate'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                        next_play = (last_play.replace(tzinfo=timezone.utc) + timedelta(hours=7)).astimezone(wib).strftime('%x %X %Z')
+                        self.log(
+                            f"{Fore.MAGENTA+Style.BRIGHT}[ Diamond Breath{Style.RESET_ALL}"
+                            f"{Fore.YELLOW+Style.BRIGHT} Not Available {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}] [ Next Play at{Style.RESET_ALL}"
+                            f"{Fore.WHITE+Style.BRIGHT} {next_play} {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                        )
+                else:
+                    self.log(
+                        f"{Fore.MAGENTA+Style.BRIGHT}[ Diamond Breath{Style.RESET_ALL}"
+                        f"{Fore.RED+Style.BRIGHT} Data Is None {Style.RESET_ALL}"
                         f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                     )
                 time.sleep(1)
