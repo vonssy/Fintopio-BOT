@@ -457,7 +457,7 @@ class Fintopio:
 
                 diamond_breath = self.start_diamond_breath(token)
                 if diamond_breath:
-                    reward = 3200
+                    reward = 6400
                     score = diamond_breath['rewardPerSecond']
                     is_available = diamond_breath['isAvailableGame']
                     if is_available:
